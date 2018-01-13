@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}AnyCrawl - 可配置化爬虫 - 列表{% endblock %}
+
+{% block content %}
+<br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb" style="margin-bottom: 0px; margin-top: 0px;">
+                    <li class="breadcrumb-item">
+                        <a href="/project">所有项目</a>
+                    </li>
+                    <li class="breadcrumb-item active"><button class="btn btn-primary create-project" ><a href="#" style="color:#ffffff; ">新建项目</a></button></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <legend>公开列表（测试可用）</legend>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>项目名</th>
+                            <th>别名</th>
+                            <th>域名</th>
+                            <!--<th>状态</th>-->
+                            <!--<th>指标</th>-->
+                            <!--<th>删除</th>-->
+                        </tr>
+                        </thead>
+                        {% for project in public_projects %}
+
+                        <tr>
+                            <td><a href="/project/{{project.id}}">{{project.id}}</a></td>
+                            <td><a href="/project/{{project.id}}">{{project.name}}</a></td>
+                            <td>{{project.alias}}</td>
+                            <td>{{project.domain}}</td>
+                            <!--<td>{{ project.status }}</td>-->
+                            <!--<td><a href="/status">指标</a></td>-->
+                            <!--<td>-->
+                                <!--<button class="btn btn-danger btn-remove-project" type="button" data-id="{{project.id}}">-->
+                                    <!--<span class="glyphicon glyphicon-minus"></span>-->
+                                <!--</button>-->
+                            <!--</td>-->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if request.user.is_authenticated %}
+        <div class="row">
+            <div class="col-md-12">
+                <legend>个人列表</legend>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>项目名</th>
+                            <th>别名</th>
+                            <th>域名</th>
+                            <!--<th>状态</th>-->
+                            <!--<th>指标</th>-->
+                            <th>删除</th>
+                        </tr>
+                        </thead>
+                        {% for project in personal_projects %}
+
+                        <tr>
+                            <td><a href="/project/{{project.id}}">{{project.id}}</a></td>
+                            <td><a href="/project/{{project.id}}">{{project.name}}</a></td>
+                            <td>{{project.alias}}</td>
+                            <td>{{project.domain}}</td>
+                            <!--<td>{{ project.status }}</td>-->
+                            <!--<td><a href="/status">指标</a></td>-->
+                            <td>
+                                <button class="btn btn-danger btn-remove-project" type="button" data-id="{{project.id}}">
+                                    <span class="glyphicon glyphicon-minus"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+$(document).on('click', '.btn-remove-project', function(e) {
+    e.preventDefault();
+    var that = $(this);
+    var project_id = that.attr('data-id');
+    var yes = confirm("确认删除吗？");
+    if(!yes) return;
+    $.ajax({
+            url: '/project/'+ project_id +'/',
+            type: 'DELETE',
+            success: function(res) {
+                that.parents('tr:first').remove();
+            }
+    })
+})
+
+
+$(document).on('click', '.create-project', function(e){
+    e.preventDefault();
+    {% if request.user.is_authenticated %}
+    window.open("/project/create")
+    {% else %}
+    $('#myModal').modal();
+    {% endif %}
+
+})
+
+</script>
+{% endblock %}

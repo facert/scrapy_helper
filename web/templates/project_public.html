@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}AnyCrawl - 可配置化爬虫 - {{project.alias}} {% endblock %}
+{% block content %}
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb" style="margin-bottom: 0px; margin-top: 0px;">
+                    <li class="breadcrumb-item">
+                        <a href="/project">所有项目</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{project.alias}}</li>
+                    <li class="breadcrumb-item active">(公开项目不予编辑)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-10">
+          <form class="form-horizontal" role="form">
+            <fieldset>
+                <input type="hidden" value="{{project.id}}" id="project_id">
+                <input type="hidden" value="{{project.pipelines}}" id="project_pipelines">
+              <!-- Form Name -->
+              <legend>基础配置</legend>
+              <!-- Text input-->
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="name" placeholder="输入项目名" class="form-control" value="{{project.name}}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="alias" placeholder="输入别名" class="form-control" value="{{project.alias}}">
+                </div>
+              </div>
+
+              <!-- Text input-->
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="domain" placeholder="输入域名" class="form-control" value="{{project.domain}}">
+                </div>
+              </div>
+
+              <!-- Text input-->
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="start_urls" placeholder="输入爬取开始的链接" class="form-control" value="{{project.start_urls}}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="col-sm-10">
+                    <select id="pipelines" class="multiselect-ui form-control" multiple="multiple" value="{{project.pipelines}}">
+                        <option value="1">Json</option>
+                        <option value="4">Csv</option>
+                        <option value="2">Image</option>
+                        <option value="3">Mongodb</option>
+                        <option value="5">Elasticsearch</option>
+                    </select>
+                  </div>
+              </div>
+
+              <legend>规则列表</legend>
+              <div class="form-group block-list">
+                  {% for rule in project.rules %}
+                  <div class="rule-block col-sm-10">
+                        <div class="rule-group">
+                            <input data-rule-id="{{rule.id}}" value="{{rule.path}}" style="" class="form-control rule-input" type="text" name="rule_path" placeholder="xpath 规则" />
+                            <input data-rule-id="{{rule.id}}" value="{{rule.callback_func}}" class="form-control rule-input" name="rule_cb" type="text" placeholder="回调函数" />
+                            <span class="input-group-btn" style="display: inline;">
+                                <button class="btn btn-danger btn-remove-rule" type="button">
+                                    <span class="glyphicon glyphicon-minus"></span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="field-block">
+                            {% for field in rule.fields %}
+                            <div class="field-group">
+                                <input data-field-id="{{field.id}}" value="{{field.path}}" style="" class="form-control field-input" name="field_path" type="text" placeholder="xpath 规则" />
+                                <input data-field-id="{{field.id}}" value="{{field.name}}" style="" class="form-control field-input" name="field_name" type="text" placeholder="Field 名字" />
+                                <span class="input-group-btn" style="display: inline;">
+                                    <button class="btn btn-danger btn-remove-field" type="button">
+                                        <span class="glyphicon glyphicon-minus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                            {% endfor %}
+                            <div class="field-group">
+                                <input  style="" class="form-control field-input" name="field_path" type="text" placeholder="xpath 规则" />
+                                <input  style="" class="form-control field-input" name="field_name" type="text" placeholder="Field 名字" />
+                                <span class="input-group-btn" style="display: inline;">
+                                    <button class="btn btn-success btn-add-field" type="button">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                  </div>
+                  {% endfor %}
+
+                  <div class="rule-block col-sm-10">
+                        <div class="rule-group">
+                            <input  style="" class="form-control rule-input" type="text" name="rule_path" placeholder="xpath 规则" />
+                            <input  class="form-control rule-input" name="rule_cb" type="text" placeholder="回调函数" />
+                            <span class="input-group-btn" style="display: inline;">
+                                <button class="btn btn-success btn-add-rule" type="button">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="field-block hide">
+                            <div class="field-group">
+                                <input  style="" class="form-control field-input" name="field_path" type="text" placeholder="xpath 规则" />
+                                <input  style="" class="form-control field-input" name="field_name" type="text" placeholder="Field 名字" />
+                                <span class="input-group-btn" style="display: inline;">
+                                    <button class="btn btn-success btn-add-field" type="button">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                  </div>
+              </div>
+
+            </fieldset>
+              <hr>
+            <button type="submit" class="btn btn-primary submit-project">查看</button>
+          </form>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(".submit-project").on("click", function(e){
+        e.preventDefault();
+        window.open("/project_status/{{project.id}}")
+    })
+
+    $('.multiselect-ui').multiselect({
+        includeSelectAllOption: true,
+        nonSelectedText: "选择保存数据方式"
+    });
+
+    $('input[type="checkbox"]').map(
+        function(i, e){
+        console.log($(this))
+            if($('#project_pipelines').val().split(',').includes($(this).val().toString()))
+                {
+                $('.checkbox').eq(i).click();
+                }
+        }
+    )
+
+</script>
+
+{% endblock %}

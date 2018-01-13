@@ -1,0 +1,115 @@
+
+{% extends "base.html" %}
+
+{% block title %}AnyCrawl - 可配置化爬虫 - {{project.alias}} - 下载{% endblock %}
+
+{% block content %}
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb" style="margin-bottom: 0px; margin-top: 0px;">
+                    <li class="breadcrumb-item">
+                        <a href="/project">所有项目</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{project.alias}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-10">
+            <h4>爬取数据指标 <span><button class="btn btn-primary" style="margin-left:100px;"><a target="_blank" href="/outputs/{{project.md5}}.zip" style="color:#ffffff; ">下载项目</a></button></span></h4>
+
+
+            <div id="main-charts" style="width: 800px;height:400px;"></div>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+
+<script>
+
+    var myChart = echarts.init(document.getElementById('main-charts'));
+
+    function generateData(value) {
+        now = new Date();
+        return {
+            name: now.toString(),
+            value: [
+                [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-')+" "+now.getHours()+":"+now.getMinutes(),
+                parseInt(value)
+            ]
+        }
+    }
+
+    var charts_data = []
+
+    option = {
+        title: {
+            text: '动态数据 + 时间坐标轴'
+        },
+        tooltip: {
+            trigger: 'axis',
+            formatter: function (params) {
+                params = params[0];
+                var date = new Date(params.name);
+                return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];
+            },
+            axisPointer: {
+                animation: false
+            }
+        },
+        xAxis: {
+            type: 'time',
+            splitLine: {
+                show: false
+            }
+        },
+        yAxis: {
+            type: 'value',
+            boundaryGap: [0, '100%'],
+            splitLine: {
+                show: false
+            }
+        },
+        series: [{
+            name: '模拟数据',
+            type: 'line',
+            showSymbol: false,
+            hoverAnimation: false,
+            data: charts_data
+        }]
+    };
+
+    function get_statistics_data() {
+        $.get("/project_statistics/{{project.id}}", function(res){
+            value = res.data.count[0];
+            charts_data.push(generateData(value));
+            option.series[0].data = charts_data
+
+            myChart.setOption(option);
+        })
+    }
+
+    <!--$.get("/project_statistics/{{project.id}}?all=true", function(res){-->
+            <!--values = res.data.count;-->
+            <!--for(var i=0; i<values.length;i++) {-->
+                <!--charts_data.push(generateData(values[i]));-->
+            <!--}-->
+            <!--option.series[0].data = charts_data-->
+            <!--myChart.setOption(option);-->
+    <!--})-->
+
+    // setInterval(function () {
+    //     get_statistics_data();
+    // }, 60000);
+
+</script>
+
+{% endblock %}

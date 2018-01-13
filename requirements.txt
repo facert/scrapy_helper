@@ -1,0 +1,4 @@
+django==1.11.5
+djangorestframework==3.6.4
+scrapy==1.4.0
+mako==1.0.7

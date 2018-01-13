@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}AnyCrawl - 可配置化爬虫 - {{project.alias}} {% endblock %}
+
+
+
+{% block content %}
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb" style="margin-bottom: 0px; margin-top: 0px;">
+                    <li class="breadcrumb-item">
+                        <a href="/project">所有项目</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{project.alias}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-10">
+          <form class="form-horizontal" role="form">
+            <fieldset>
+                <input type="hidden" value="{{project.id}}" id="project_id">
+                <input type="hidden" value="{{project.pipelines}}" id="project_pipelines">
+              <!-- Form Name -->
+              <legend>基础配置</legend>
+              <!-- Text input-->
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="name" placeholder="输入项目名（eg. douban） " class="form-control" value="{{project.name}}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="alias" placeholder="输入别名 （eg. 豆瓣小组）" class="form-control" value="{{project.alias}}">
+                </div>
+              </div>
+
+              <!-- Text input-->
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="domain" placeholder="输入域名, 多个以英文逗号相隔（eg. www.douban.com）" class="form-control" value="{{project.domain}}">
+                </div>
+              </div>
+
+              <!-- Text input-->
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <input type="text" name="start_urls" placeholder="输入爬取开始的链接， 多个以英文逗号相隔（eg. https://www.douban.com/group/ustv/discussion）" class="form-control" value="{{project.start_urls}}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="col-sm-10">
+                    <select id="pipelines" class="multiselect-ui form-control" multiple="multiple" value="{{project.pipelines}}">
+                        <option value="1">Json</option>
+                        <option value="4">Csv</option>
+                        <option value="2">Image</option>
+                        <option value="3">Mongodb</option>
+                        <option value="5">Elasticsearch</option>
+                    </select>
+                  </div>
+              </div>
+
+              <legend>规则列表</legend>
+              <div class="form-group block-list">
+                  {% for rule in project.rules %}
+                  <div class="rule-block col-sm-10">
+                        <div class="rule-group">
+                            <input data-rule-id="{{rule.id}}" value="{{rule.path}}" style="" class="form-control rule-input" type="text" name="rule_path" placeholder="链接正则（eg. /group/topic/\d+/）" />
+                            <input data-rule-id="{{rule.id}}" value="{{rule.callback_func}}" class="form-control rule-input" name="rule_cb" type="text" placeholder="回调函数, 以 parse_ 开头（eg. parse_topic）" />
+                            <span class="input-group-btn" style="display: inline;">
+                                <button class="btn btn-danger btn-remove-rule" type="button">
+                                    <span class="glyphicon glyphicon-minus"></span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="field-block">
+                            {% for field in rule.fields %}
+                            <div class="field-group">
+                                <input data-field-id="{{field.id}}" value="{{field.path}}" style="" class="form-control field-input" name="field_path" type="text" placeholder="xpath 规则 （eg. //div/a[@href]/text()）" />
+                                <input data-field-id="{{field.id}}" value="{{field.name}}" style="" class="form-control field-input" name="field_name" type="text" placeholder="Field 名字 （eg. title ）" />
+                                <span class="input-group-btn" style="display: inline;">
+                                    <button class="btn btn-danger btn-remove-field" type="button">
+                                        <span class="glyphicon glyphicon-minus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                            {% endfor %}
+                            <div class="field-group">
+                                <input  style="" class="form-control field-input" name="field_path" type="text" placeholder="xpath 规则 （eg. //div/a[@href]/text()）" />
+                                <input  style="" class="form-control field-input" name="field_name" type="text" placeholder="Field 名字 （eg. title ）" />
+                                <span class="input-group-btn" style="display: inline;">
+                                    <button class="btn btn-success btn-add-field" type="button">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                  </div>
+                  {% endfor %}
+
+                  <div class="rule-block col-sm-10">
+                        <div class="rule-group">
+                            <input  style="" class="form-control rule-input" type="text" name="rule_path" placeholder="xpath 规则（eg. //div/a[@href]/text() ）" />
+                            <input  class="form-control rule-input" name="rule_cb" type="text" placeholder="回调函数, 以 parse_ 开头（eg. parse_topic）" />
+                            <span class="input-group-btn" style="display: inline;">
+                                <button class="btn btn-success btn-add-rule" type="button">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="field-block hide">
+                            <div class="field-group">
+                                <input  style="" class="form-control field-input" name="field_path" type="text" placeholder="xpath 规则 （eg. //div/a[@href]/text()）" />
+                                <input  style="" class="form-control field-input" name="field_name" type="text" placeholder="Field 名字 （eg. title ）" />
+                                <span class="input-group-btn" style="display: inline;">
+                                    <button class="btn btn-success btn-add-field" type="button">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                  </div>
+              </div>
+
+            </fieldset>
+              <hr>
+            <button type="submit" class="btn btn-success submit-project">提交</button>
+            <button type="submit" class="btn btn-primary check-project">查看</button>
+          </form>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+        $(".check-project").on("click", function(e){
+            e.preventDefault();
+            window.open("/project_status/{{project.id}}")
+        })
+
+        $(document).on('click', '.btn-add-rule', function(e)
+        {
+            e.preventDefault();
+
+            var controlForm = $('.block-list:first'),
+                currentEntry = $(this).parents('.rule-block:first');
+
+            var rule_path_ele = currentEntry.find('input[name="rule_path"]')
+            var rule_cb_ele = currentEntry.find('input[name="rule_cb"]')
+
+            if (rule_path_ele.val()) {
+                 $.post('/rule/', {"path": rule_path_ele.val(), "callback_func": rule_cb_ele.val()}, function(res){
+                    var rule_id = res.data.id;
+                    rule_path_ele.attr('data-rule-id', rule_id);
+                    rule_cb_ele.attr('data-rule-id', rule_id);
+                    newEntry = $(currentEntry.clone()).appendTo(controlForm);
+                    newEntry.find('input').val('');
+                    currentEntry.find(".field-block").removeClass('hide');
+                    currentEntry.find(".field-block").attr('data-rule-id', rule_id);
+                    controlForm.find('.rule-group:not(:last) .btn-add-rule')
+                        .removeClass('btn-add-rule').addClass('btn-remove-rule')
+                        .removeClass('btn-success').addClass('btn-danger')
+                        .html('<span class="glyphicon glyphicon-minus"></span>');
+                })
+            }
+
+
+
+        }).on('click', '.btn-remove-rule', function(e)
+        {
+            var currentEntry = $(this).parents('.rule-block:first');
+            var rule_path_ele = currentEntry.find('input[name="rule_path"]');
+            //var rule_cb_ele = currentEntry.find('input[name="rule_cb"]');
+            var rule_id = rule_path_ele.attr('data-rule-id');
+            if (rule_id) {
+                 $.ajax({
+                        url: '/rule/'+ rule_id +'/',
+                        type: 'DELETE',
+                        success: function(res) {
+                        }
+                })
+            }
+
+            $(this).parents('.rule-block:first').remove();
+            e.preventDefault();
+            return false;
+        });
+
+
+        $(document).on('click', '.btn-add-field', function(e)
+        {
+            e.preventDefault();
+
+            var controlForm = $(this).parents('.field-block:first'),
+                currentEntry = $(this).parents('.field-group:first');
+
+
+            var field_path_ele = currentEntry.find('input[name="field_path"]')
+            var field_name_ele = currentEntry.find('input[name="field_name"]')
+            var rule_id = controlForm.attr('data-rule-id');
+
+
+            if (field_path_ele.val() && field_name_ele.val()) {
+                 $.post('/field/', {"path": field_path_ele.val(), "name": field_name_ele.val(), "rule": rule_id}, function(res){
+                    var field_id = res.data.id;
+                    field_path_ele.attr('data-field-id', field_id);
+                    field_name_ele.attr('data-field-id', field_id);
+                    newEntry = $(currentEntry.clone()).appendTo(controlForm);
+                    newEntry.find('input').val('');
+                    controlForm.find('.field-group:not(:last) .btn-add-field')
+                        .removeClass('btn-add-field').addClass('btn-remove-field')
+                        .removeClass('btn-success').addClass('btn-danger')
+                        .html('<span class="glyphicon glyphicon-minus"></span>');
+                })
+            }
+
+        }).on('click', '.btn-remove-field', function(e)
+        {
+            var currentEntry = $(this).parents('.field-group:first');
+            var field_path_ele = currentEntry.find('input[name="field_path"]');
+            var field_id = field_path_ele.attr('data-field-id');
+            if (field_id) {
+                 $.ajax({
+                        url: '/field/'+ field_id +'/',
+                        type: 'DELETE',
+                        success: function(res) {
+                        }
+                })
+            }
+
+            $(this).parents('.field-group:first').remove();
+
+            e.preventDefault();
+            return false;
+        });
+
+        $('.multiselect-ui').multiselect({
+                includeSelectAllOption: true,
+                nonSelectedText: "选择保存数据方式"
+            });
+
+        $('input[type="checkbox"]').map(
+            function(i, e){
+            console.log($(this))
+                if($('#project_pipelines').val().split(',').includes($(this).val().toString()))
+                    {
+                    $('.checkbox').eq(i).click();
+                    }
+            }
+        )
+
+        $(document).on('click', '.submit-project', function(e){
+            e.preventDefault();
+            var rules_data = [];
+            $(".rule-block").map(function(){
+                var rule_path = $(this).find('input[name="rule_path"]').eq(0).val();
+                var rule_cb = $(this).find('input[name="rule_cb"]').eq(0).val();
+                var rule_id = $(this).find('input[name="rule_cb"]').eq(0).attr('data-rule-id');
+                var rule_data = {'path': rule_path, 'callback_func': rule_cb, 'id': rule_id, 'fields': []}
+                var field_group_ele = $(this).find('.field-group');
+                field_group_ele.map(function(i, e){
+                    var field_path_value = $(this).find('input[name="field_path"]').eq(0).val();
+                    var field_name_value = $(this).find('input[name="field_name"]').eq(0).val();
+                    var field_id = $(this).find('input[name="field_name"]').eq(0).attr('data-field-id');
+                    if(field_path_value && field_name_value) {
+                        rule_data['fields'].push({'name': field_name_value, 'path': field_path_value, 'id': field_id})
+                    }
+                })
+                if (rule_path){
+                    rules_data.push(rule_data);
+                }
+            })
+
+            var pipelines = []
+            $('#pipelines :selected').map(function(i, el) {pipelines.push($(el).val());})
+
+            var data = {
+                "id": $("#project_id").val(),
+                "name": $("input[name='name']").val(),
+                "alias": $("input[name='alias']").val(),
+                "domain": $("input[name='domain']").val(),
+                "start_urls": $("input[name='start_urls']").val(),
+                "pipelines": pipelines.join(','),
+                "rules": rules_data
+            }
+
+            console.log(JSON.stringify(data));
+
+            $.ajax(
+                {
+                    url: '/project/'+ $("#project_id").val()+'/',
+                    type: 'PUT',
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(res) {
+                        alert("创建成功，3秒后跳转");
+                        setTimeout(window.location.href = "/project_status/{{project.id}}", 3000)
+                    }
+                }
+
+            );
+
+        })
+</script>
+
+{% endblock %}
